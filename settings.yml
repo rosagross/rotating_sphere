@@ -1,0 +1,35 @@
+preferences:
+    general:
+        audioLib: PTB
+        units: deg
+
+window:
+    size: [1920, 1080]
+    pos: [0, 0]
+    color: [0, 0, 0]
+    fullscr: True
+    winType: pyglet
+    waitBlanking: True
+
+monitor:
+    name: default
+    width: 40 # 69.8  # in cm
+    distance: 45  # in cm
+    gamma: 1
+
+operating system: linux
+
+Task settings: 
+    Response interval: [0.1, 1.5] # time in s you allow the participant to respond that still counts as correct response (only relevant for unambiguous stimuli)
+    Blocks: 4 # e.g. 2 blocks would be one that starts with ambiguous and one that starts with unambiguous.
+    Blocks practice: 2 # can be interrupted after every block - alternating ambiguous and unambiguous, ambiguous is always first 
+    Previous percept duration: 3 # in s, mean of percept duration from previous studies (used to determine duration of unambiguos trials)
+    Percept duration jitter: 0.5 # in s, added to the previous percept duration (0.1 would be a random UNIFORM jitter between -0.1 and 0.1)
+    Stimulus duration ambiguous: 10 # 120 # (2mins) duration in s
+    Break duration: 5 # duration in s (this is between the trials AND blocks)
+    Stimulus path: './stimuli/'
+    Stimulus size: 10 # stimulus size in degrees (INCLUDING FIXATION!)
+    Screenshot: False # makes a screenshot when aborting experiment if True
+    Exit key: 'q'
+    Monitor framerate: 60 # or 120Hz, this changes how the rotating spheres are displayed 
+    Response hand: 'preferred_right' # enter here which hand was used to respond to the stimulus!
