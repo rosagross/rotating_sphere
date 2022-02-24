@@ -49,15 +49,24 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.stim_dur_ambiguous = self.settings['Task settings']['Stimulus duration ambiguous']
         self.response_interval = self.settings['Task settings']['Response interval']
         self.response_hand = self.settings['Task settings']['Response hand']
+        self.buttons = self.settings['Task settings']['Buttons']
         self.phase_names = ["fixation", "stimulus", "response"]
         self.exit_key = self.settings['Task settings']['Exit key']
-        self.monitor_framerate = self.settings['Task settings']['Monitor framerate']
+        self.monitor_refreshrate = self.settings['Task settings']['Monitor framerate']
 
         # this determines how fast our stimulus images change, so the speed of the rotation 
-        self.refresh_stimulus_speed = int(self.monitor_framerate/30)
+        self.refresh_stimulus_speed = int(self.monitor_refreshrate/30)
 
         # randomly choose if the participant responds with the right BUTTON to house or face
-        self.response_button = 'upper_right' if random.uniform(1,100) < 50 else 'upper_left'
+        if random.uniform(1,100) < 50:
+            self.response_button = 'upper_right'
+            self.button_right = self.buttons[1]
+            self.button_left = self.buttons[0]
+        else:
+            self.response_button = 'upper_left'
+            self.button_right = self.buttons[0]
+            self.button_left = self.buttons[1]
+        
 
         # initialize the keyboard for the button presses
         self.kb = keyboard.Keyboard()
@@ -92,60 +101,62 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.practice_blocks = []
         block_ID_ambiguous = 0 
         block_ID_unambig = 0
-        trial_nr = 1
+        self.trial_nr = 0
 
         # define which condition starts (equal subjects are 0, unequal 1)
         # either start with ambiguous or unambiguous 
         self.start_condition = 0 if self.subject_ID % 2 == 0 else 1
 
         # create the phase array for the ambiguous condition (same in all ambiguous blocks)
-        nr_phases_ambig = int(self.stim_dur_ambiguous*self.monitor_framerate/self.refresh_stimulus_speed)
+        nr_phases_ambig = int(self.stim_dur_ambiguous*self.monitor_refreshrate/self.refresh_stimulus_speed)
         phase_durations_ambiguous = [self.refresh_stimulus_speed]*nr_phases_ambig
         ambig_last_frame_previous = nr_phases_ambig%190
 
         # add practice blocks beforehand 
         for i in range(self.n_practice_blocks):
-            print("Append practice blocks")
             # one ambiguous first
             self.practice_blocks.append([RSTrial(self, 0, 0, 'ambiguous_practice', 'ambiguous_practice', self.response_hand, phase_durations_ambiguous, 'frames', 0)])
             # then one unambiguous
+
             unambiguous_practice_durations = self.create_duration_array()
             unambiguous_practice_block = self.create_unambiguous_block(unambiguous_practice_durations, i, 'unambiguous_practice')
             self.practice_blocks.append(unambiguous_practice_block)
-
-        print('length practice', self.practice_blocks)
+            
+        # start off with a break
+        block_ID = 0
+        self.trial_list.append(RSTrial(self, 0, block_ID, 'break', 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
+            
         # now start adding the real blocks 
         for i in range(self.n_blocks):
             # we start counting with 1 because the blocks with ID 0 are breaks!
-            block_ID = i + 1 
-            print("\ncurrent block is", block_ID)
-            print("start condition", self.start_condition)
 
-            # we start with a break (which will have the block ID of the block that was previously running or 0 if first break)
-            self.trial_list.append(RSTrial(self, 0, block_ID_ambiguous, 'break', 'break', self.response_hand, [self.break_duration*self.monitor_framerate], 'frames', 0))
-            # equal subjects start with rivarly, unequal with unambiguous
+            block_ID = i + 1
+
+            # even subjects start with rivarly, odd with unambiguous
             if (block_ID + self.start_condition) % 2 == 0:
                 block_ID_ambiguous += 1
                 block_type = 'ambiguous'
                 trial_type = 'ambiguous'
-
-                self.trial_list.append(RSTrial(self, trial_nr, block_ID_ambiguous, block_type, trial_type, self.response_hand, phase_durations_ambiguous, 'frames', ambig_last_frame_previous))
-                print("appended trial nr", trial_nr)
-                trial_nr += 1 
+                self.trial_nr += 1
+                self.trial_list.append(RSTrial(self, self.trial_nr, block_ID_ambiguous, block_type, trial_type, self.response_hand, phase_durations_ambiguous, 'frames', ambig_last_frame_previous))
+                self.trial_nr += 1
+                self.trial_list.append(RSTrial(self, self.trial_nr, block_ID_ambiguous, block_type, 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
+                
 
             else:
                 block_type = 'unambiguous'
                 block_ID_unambig += 1
                 # create the phase duration array 
                 # total duration should add up to 120s for all unambiguous blocks
-
                 stim_dur_unambiguous = self.create_duration_array()
-                print("durations unambiguous:", stim_dur_unambiguous)
-
+                self.nr_unambiguous_trials = self.nr_unambiguous_trials + len(stim_dur_unambiguous)
                 unambiguous_block = self.create_unambiguous_block(stim_dur_unambiguous, block_ID_unambig, block_type)
+                
                 # append it to the trial list
                 self.trial_list = [*self.trial_list, *unambiguous_block]
-                
+                self.trial_list.append(RSTrial(self, self.trial_nr, block_ID_unambig, block_type, 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
+                self.trial_nr += 1
+                     
 
 
     def create_stimuli(self):
@@ -179,27 +190,32 @@ class RotatingSphereSession(PylinkEyetrackerSession):
             0.1s, a random nr between -0.1 and 0.1 is added. 
             """
 
-            # while the number is not above the trial duration, generate more trial durations
-            max_duration = self.stim_dur_ambiguous
-            nr_frames_total = max_duration*self.monitor_framerate
-            frames_percept_duration = self.previous_percept_duration*self.monitor_framerate
-            jitter_in_frames = int(self.percept_jitter*self.monitor_framerate)
-            current_duration = 0 
-            phase_durations = []
-            while True:
-                percept_duration = frames_percept_duration + random.randrange(-jitter_in_frames, jitter_in_frames)
-                current_duration = np.array(phase_durations).sum() + percept_duration
-                if current_duration > nr_frames_total:
-                    break
-                
-                phase_durations.append(percept_duration)
-                
-            current_duration = np.array(phase_durations).sum()
-            duration_difference = nr_frames_total - current_duration
-            # append whats missing to the last trial
-            phase_durations.append(duration_difference)
-            print("duration unambiguous block:", np.array(phase_durations).sum(), "and length:", len(phase_durations))
-            self.nr_unambiguous_trials = self.nr_unambiguous_trials + len(phase_durations)
+            if isinstance(self.previous_percept_duration, list):
+                print('Use predefined phase durations')
+                phase_durations = [elem*2 for elem in self.previous_percept_duration]
+                np.random.shuffle(phase_durations)
+            else:
+                # while the number is not above the trial duration, generate more trial durations
+                max_duration = self.stim_dur_ambiguous
+                nr_frames_total = max_duration*self.monitor_refreshrate
+                frames_percept_duration = self.previous_percept_duration*self.monitor_refreshrate
+                jitter_in_frames = int(self.percept_jitter*self.monitor_refreshrate)
+                current_duration = 0 
+                phase_durations = []
+                while True:
+                    percept_duration = frames_percept_duration + random.randrange(-jitter_in_frames, jitter_in_frames)
+                    current_duration = np.array(phase_durations).sum() + percept_duration
+                    if current_duration > nr_frames_total:
+                        break
+                    
+                    phase_durations.append(percept_duration)
+                    
+                current_duration = np.array(phase_durations).sum()
+                duration_difference = nr_frames_total - current_duration
+                # append whats missing to the last trial
+                phase_durations.append(duration_difference)
+            
+            print("durations unambiguous block:", np.array(phase_durations).sum(), "and length:", len(phase_durations))
             print(phase_durations)
             return phase_durations
        
@@ -211,44 +227,40 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         # the block will start at the beginning of the 190 frames of the stimulus
         last_frame_previous = 0 
         dummy = 0 # need this to add the previous last frame from the trial before
-        trial_nr = 0
         block_list = [] # this is where we store the trials prior to concatenating them to the suitable trial list
 
         # the durations should determine the switch between left and right rotation
         for i, stim_duration in enumerate(stim_duration_list):
             # determine if next trial shows house or face
-            trial_type = 'left' if trial_nr % 2 == 0 else 'right'
-
-            print("appended trial nr", trial_nr)
-            print("trial number in unabiguous:", i)
-            print("stimulus duration (in frames!!)", stim_duration)
+            trial_type = 'left' if self.trial_nr % 2 == 0 else 'right'
 
             # create the phase durations depending on the duration of the stimulus
             nr_phases_unambig = int(stim_duration/self.refresh_stimulus_speed)
             phase_durations_unambiguous = [self.refresh_stimulus_speed]*nr_phases_unambig
-            print(len(phase_durations_unambiguous), nr_phases_unambig)
             
-            # the numeber of phases also tell us which image was the last one, so that
+            # the number of phases also tell us which image was the last one, so that
             # the next rotation can start from there
             last_frame_previous = (last_frame_previous+dummy)%190
-            block_list.append(RSTrial(self, trial_nr, block_ID_unambig, block_type, trial_type, self.response_hand, phase_durations_unambiguous,'frames', last_frame_previous))
+            if trial_type == 'right':
+                last_frame_previous = 190 - last_frame_previous 
+            elif trial_type == 'left':
+                last_frame_previous = abs(last_frame_previous - 190)
+            self.trial_nr += 1 
+            block_list.append(RSTrial(self, self.trial_nr, block_ID_unambig, block_type, trial_type, self.response_hand, phase_durations_unambiguous,'frames', last_frame_previous))
             # save old value and update new one
             dummy = last_frame_previous
             last_frame_previous = nr_phases_unambig
 
-            trial_nr += 1 
-        
         return block_list
 
     def save_output(self):
         
         # calculate the mean duration of percepts in ambiguous blocks
-        expected_responses = self.nr_unambiguous_trials - (self.n_blocks/2)
         np.savez(opj(self.output_dir, self.output_str+'_summary_response_data.npz'), ["Date & time", "Reponse hand", "Response button", "Monitor refreshrate (in Hz)", "Stimulus duration ambiguous", 
-                                                                                      "Switch durations (mean)", "Switch durations jitter", "Expected number of responses (unambiguous)",
+                                                                                      "Switch durations", "Switch durations jitter", "Expected number of responses (unambiguous)",
                                                                                       "Subject responses (unambiguous)", "Subject responses (ambiguous)"],
-                                                                                       [datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.response_hand, self.response_button, self.monitor_framerate, 
-                                                                                       self.stim_dur_ambiguous, self.previous_percept_duration, self.percept_jitter, expected_responses, 
+                                                                                       [datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.response_hand, self.response_button, self.monitor_refreshrate, 
+                                                                                       self.stim_dur_ambiguous, self.previous_percept_duration, self.percept_jitter, self.nr_unambiguous_trials, 
                                                                                        self.unambiguous_responses, self.ambiguous_responses])
         
 
@@ -258,21 +270,40 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         """
         # we want to start there where we ended in the previous rotation
         frame_index = (self.current_trial.phase+self.current_trial.last_frame_previous+1)%190
-
-        if self.current_trial.block_type == 'break':
+        if self.current_trial.trial_type == 'break':
             # in the break phase there is only the fixation dot on a blank screen
             self.fixation_dot.draw()
 
         elif re.match(r"(ambiguous)(.*)", self.current_trial.block_type):
             self.ambiguous_stim_list[frame_index].draw()
-
+        
         elif re.match(r"(unambiguous)(.*)", self.current_trial.block_type):
             if self.current_trial.trial_type=='left':
                 # makes the index count backwards and starts from the end when finished
-                self.unambiguous_stim_list[-(frame_index+1)].draw()
+                self.unambiguous_stim_list[-frame_index].draw()
             else:
                 self.unambiguous_stim_list[frame_index].draw()
 
+    def  wait_for_yesno(self, text):
+        '''
+        This function is used to implement a yes or no response. 
+        If the key pressed 'y' it returns True, if 'n' it returns false. 
+        '''
+
+        stim = visual.TextStim(self.win, text=text)
+        stim.draw()
+        self.win.flip()
+        wait_for_key = True
+        while wait_for_key:
+            keys = self.kb.getKeys(keyList=['y', 'n'])  
+            for key in keys:
+                if key.name == 'y':
+                    answer = True
+                    wait_for_key = False
+                elif key.name == 'n':
+                    answer = False
+                    wait_for_key = False
+        return answer
 
     def run(self):
         print("-------------RUN SESSION---------------")
@@ -288,47 +319,34 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         
         self.display_text(button_instructions, keys='space')
         
-        # ask if practice block is neces
-        end_practice_text = 'Start practice block? (press y/n)?'
-        stim = visual.TextStim(self.win, text=end_practice_text)
-        stim.draw()
-        self.win.flip()
+        # ask if practice block is needed
+        start_practice = self. wait_for_yesno('Start practice block? (press y/n)?')
 
-        while True:
-            key = self.kb.getKeys(keyList=['y', 'n'])  
-            if len(key)>0:
-                start_practice = True if key == 'y' else False
-                    
         # this method actually starts the timer which keeps track of trial onsets
         self.start_experiment()
-
-        print('pracitce', self.practice_blocks)
-        print(len(self.practice_blocks))
-        for block in self.practice_blocks:
-
-            print('BLOCK', block)
-            for trial in block:
-                print('trial', trial)
-                self.current_trial = trial
-                self.current_trial.run()
-            
-            end_practice_text = 'End of practice block!\n Would you like to continue practicing (press y/n)?'
-            stim = visual.TextStim(self.win, text=end_practice_text)
-            stim.draw()
-            self.win.flip()
-
-            while True:
-                key = self.kb.getKeys(keyList=['y', 'n'])  
-                if len(key)>0:
-                    if key == 'n':
-                        break        
-        
-        self.display_text('End of practice block. \nAre you ready to start the experiment?', keys='space')
         self.kb.clock.reset()
-        
+
+        if start_practice:
+
+            for block in self.practice_blocks:
+                for trial in block:
+                    self.current_trial = trial
+                    self.current_trial.run()
+                
+                end_practice_text = 'End of practice block!\n Would you like to STOP practicing (press y/n)?'
+                stop_practicing = self.wait_for_yesno(end_practice_text)
+            
+                if stop_practicing:
+                    break
+            
+            self.display_text('End of practice block. \nAre you ready to start the experiment?', keys='space')
+        else:
+            self.display_text('Are you ready to start the experiment?', keys='space')
+            
+        # self.kb.clock.reset()
         for trial in self.trial_list:
             self.current_trial = trial 
-            self.current_trial_start_time = self.clock.getTime()
+            self.current_trial_start_time = self.kb.clock.getTime()
             # the run function is implemented in the parent Trial class, so our Trial inherited it
             self.current_trial.run()
 

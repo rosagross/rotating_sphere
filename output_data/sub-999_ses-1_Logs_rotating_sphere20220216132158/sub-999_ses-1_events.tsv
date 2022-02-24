@@ -1,4 +1,0 @@
-trial_nr	onset	event_type	phase	response	nr_frames	block_type	trial_type	response_hand	phase_length	key_duration	onset_abs	duration
-0	0.010742199956439435	stim	0		0	break	break	preferred	1.0		4.6671909999568015	2.95828000002075
-0	2.9690221999771893	break	0	space	0	break	break	preferred	1.0	0.07403460005298257	7.625470999977551	0.23023290000855923
-0	3.1992550999857485	break	0	space	80	break	break	preferred	1.0	0.1110128000145778	7.855703899986111	-1.7987700999947265
