@@ -30,7 +30,7 @@ Task settings:
     Stimulus duration ambiguous: 20 # 120 # (2mins) duration in s
     Break duration: 5 # duration in s (this is between the trials AND blocks)
     Stimulus path: './stimuli/'
-    Stimulus size: 10 # stimulus size in degrees (INCLUDING FIXATION!)
+    Stimulus size: 5 # stimulus size in degrees (INCLUDING FIXATION!)
     Screenshot: False # makes a screenshot when aborting experiment if True
     Exit key: 'q'
     Monitor framerate: 60 # or 120Hz, this changes how the rotating spheres are displayed 

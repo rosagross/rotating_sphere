@@ -41,6 +41,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
     	
         self.subject_ID = subject_ID
         self.path_to_stim = self.settings['Task settings']['Stimulus path']
+        self.stim_size = self.settings['Task settings']['Stimulus size']
         self.n_blocks = self.settings['Task settings']['Blocks'] 
         self.n_practice_blocks = self.settings['Task settings']['Blocks practice'] 
         self.break_duration = self.settings['Task settings']['Break duration']
@@ -174,8 +175,8 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         for i in range(190):
             filename_amb = f'Amb_190x190-190frames-350dots(size=0.02)_1.{i+1}.bmp'
             filename_unamb = f'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.{i+1}.bmp'
-            self.ambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_amb))
-            self.unambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_unamb))
+            self.ambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_amb, units='deg', size=self.stim_size))
+            self.unambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_unamb, units='deg', size=self.stim_size))
 
         # technically, the unambiguous stimuli are the same, but the order in which the images are played is flipped
         self.unambiguous_stim_left = visual.ImageStim(self.win, image=self.path_to_stim+'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.10.bmp')
@@ -339,9 +340,9 @@ class RotatingSphereSession(PylinkEyetrackerSession):
                 if stop_practicing:
                     break
             
-            self.display_text('End of practice block. \nAre you ready to start the experiment?', keys='space')
+            self.display_text('End of practice block. \nAre you ready to start the experiment?', keys='t')
         else:
-            self.display_text('Are you ready to start the experiment?', keys='space')
+            self.display_text('Are you ready to start the experiment?', keys='t')
             
         # self.kb.clock.reset()
         for trial in self.trial_list:
