@@ -146,6 +146,10 @@ class RSTrial(Trial):
                 for param, val in self.parameters.items():
                     self.session.global_log.loc[idx, param] = val
 
+                if self.eyetracker_on:  # send message to eyetracker
+                    msg = f'start_type-{event_type}_trial-{self.trial_nr}_phase-{self.phase}_key-{thisKey.name}_time-{t}'
+                    self.session.tracker.sendMessage(msg)
+
     def get_button_validity(self, keyName, offset_delay, event_type):
         
         response_key = np.NaN
