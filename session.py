@@ -155,8 +155,9 @@ class RotatingSphereSession(PylinkEyetrackerSession):
                 
                 # append it to the trial list
                 self.trial_list = [*self.trial_list, *unambiguous_block]
-                self.trial_list.append(RSTrial(self, self.trial_nr, block_ID_unambig, block_type, 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
                 self.trial_nr += 1
+                self.trial_list.append(RSTrial(self, self.trial_nr, block_ID_unambig, block_type, 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
+                
                      
 
 
@@ -169,14 +170,20 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.ambiguous_stim = visual.ImageStim(self.win, image=self.path_to_stim+'Amb_190x190-190frames-350dots(size=0.02)_1.169.bmp')
         
         self.ambiguous_stim_list = []
-        self.unambiguous_stim_list = []
+        self.unambiguous_stim_list_right = []
+        self.unambiguous_stim_list_left = []
 
         # we have 190 images for 
         for i in range(190):
             filename_amb = f'Amb_190x190-190frames-350dots(size=0.02)_1.{i+1}.bmp'
-            filename_unamb = f'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.{i+1}.bmp'
+            filename_unamb_right = f'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.{i+1}.bmp'
+            filename_unamb_left = f'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.{190-i}.bmp'
+            
             self.ambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_amb, units='deg', size=self.stim_size))
-            self.unambiguous_stim_list.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_unamb, units='deg', size=self.stim_size))
+            self.unambiguous_stim_list_right.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_unamb_right, units='deg', size=self.stim_size))
+            # create the left rotation list separately since it takes longer if we do the indices counting backwards later on!
+            self.unambiguous_stim_list_left.append(visual.ImageStim(self.win, image=self.path_to_stim+filename_unamb_left, units='deg', size=self.stim_size))
+
 
         # technically, the unambiguous stimuli are the same, but the order in which the images are played is flipped
         self.unambiguous_stim_left = visual.ImageStim(self.win, image=self.path_to_stim+'UnambContr_0.25BB_0.75WB_0BF_1WF_0.012-0.028DS_190x190-190frames-350dots(size=0.02)_1.10.bmp')
@@ -233,7 +240,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         # the durations should determine the switch between left and right rotation
         for i, stim_duration in enumerate(stim_duration_list):
             # determine if next trial shows house or face
-            trial_type = 'left' if self.trial_nr % 2 == 0 else 'right'
+            trial_type = 'right' if self.trial_nr % 2 == 0 else 'left'
 
             # create the phase durations depending on the duration of the stimulus
             nr_phases_unambig = int(stim_duration/self.refresh_stimulus_speed)
@@ -281,9 +288,9 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         elif re.match(r"(unambiguous)(.*)", self.current_trial.block_type):
             if self.current_trial.trial_type=='left':
                 # makes the index count backwards and starts from the end when finished
-                self.unambiguous_stim_list[-frame_index].draw()
+                self.unambiguous_stim_list_left[frame_index].draw()
             else:
-                self.unambiguous_stim_list[frame_index].draw()
+                self.unambiguous_stim_list_right[frame_index].draw()
 
     def  wait_for_yesno(self, text):
         '''

@@ -29,7 +29,8 @@ class RSTrial(Trial):
         
         super().__init__(session, trial_nr, phase_duration,
                          parameters={'block_type': block_type,
-                                     'trial_type': trial_type, 
+                                     'trial_type': trial_type,
+                                     'trial_nr': trial_nr, 
                                      'block_ID' : block_ID,
                                      'response_hand': response_hand,
                                      'phase_length' : len(phase_duration),
