@@ -122,9 +122,15 @@ class RotatingSphereSession(PylinkEyetrackerSession):
             unambiguous_practice_durations = self.create_duration_array()
             unambiguous_practice_block = self.create_unambiguous_block(unambiguous_practice_durations, i, 'unambiguous_practice')
             self.practice_blocks.append(unambiguous_practice_block)
-            
-        # start off with a break
+        
         block_ID = 0
+        # trial to test the eye tracker and the data analysis (e.g. if positions are measured correctly)
+        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '0', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '1', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '2', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '3', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+
+        # start off with a break
         self.trial_list.append(RSTrial(self, 0, block_ID, 'break', 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))
             
         # now start adding the real blocks 
@@ -165,6 +171,11 @@ class RotatingSphereSession(PylinkEyetrackerSession):
 
         # here we load the images that were produced in the MATLAB code 
         self.fixation_dot = visual.ImageStim(self.win, image=self.path_to_stim+'FixDot.bmp')
+
+        # load a stimulus that can test the eye tracking data 
+        dots = [visual.Circle(self.win, pos=[-8,-8]), visual.Circle(self.win, pos=[8,-8]),
+                visual.Circle(self.win, pos=[8,8]), visual.Circle(self.win, pos=[-8,8])]
+        self.eye_tracking_test = dots
         
         # save the globe stimuli in different lists, since one rotation consists out of 190 images
         self.ambiguous_stim = visual.ImageStim(self.win, image=self.path_to_stim+'Amb_190x190-190frames-350dots(size=0.02)_1.169.bmp')
@@ -281,7 +292,6 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         if self.current_trial.trial_type == 'break':
             # in the break phase there is only the fixation dot on a blank screen
             self.fixation_dot.draw()
-
         elif re.match(r"(ambiguous)(.*)", self.current_trial.block_type):
             self.ambiguous_stim_list[frame_index].draw()
         
@@ -291,6 +301,8 @@ class RotatingSphereSession(PylinkEyetrackerSession):
                 self.unambiguous_stim_list_left[frame_index].draw()
             else:
                 self.unambiguous_stim_list_right[frame_index].draw()
+        elif self.current_trial.block_type == 'tracking_test':
+            self.eye_tracking_test[int(self.current_trial.trial_type)].draw()
 
     def  wait_for_yesno(self, text):
         '''
