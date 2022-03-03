@@ -54,6 +54,10 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.phase_names = ["fixation", "stimulus", "response"]
         self.exit_key = self.settings['Task settings']['Exit key']
         self.monitor_refreshrate = self.settings['Task settings']['Monitor framerate']
+        if self.settings['Task settings']['Screenshot']==True:
+            self.screen_dir=output_dir+'/'+output_str+'_Screenshots'
+            if not os.path.exists(self.screen_dir):
+                os.mkdir(self.screen_dir)
 
         # this determines how fast our stimulus images change, so the speed of the rotation 
         self.refresh_stimulus_speed = int(self.monitor_refreshrate/30)
@@ -173,8 +177,11 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.fixation_dot = visual.ImageStim(self.win, image=self.path_to_stim+'FixDot.bmp')
 
         # load a stimulus that can test the eye tracking data 
-        dots = [visual.Circle(self.win, pos=[-8,-8]), visual.Circle(self.win, pos=[8,-8]),
-                visual.Circle(self.win, pos=[8,8]), visual.Circle(self.win, pos=[-8,8])]
+        dots = [visual.Circle(self.win, lineColor='red', units='pix', size=70, pos=[-250,-250]),
+                visual.Circle(self.win, lineColor='red', units='pix', size=70, pos=[250,-250]),
+                visual.Circle(self.win, lineColor='red', units='pix', size=70, pos=[250,250]),
+                visual.Circle(self.win, lineColor='red', units='pix', size=70, pos=[-250,250])]
+
         self.eye_tracking_test = dots
         
         # save the globe stimuli in different lists, since one rotation consists out of 190 images

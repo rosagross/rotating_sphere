@@ -68,6 +68,9 @@ class RSTrial(Trial):
                 self.session.close()
                 self.session.quit()
 
+            elif thisKey=='s':
+                self.session.win.getMovieFrame()
+                self.session.win.saveMovieFrames(opj(self.session.screen_dir, self.session.output_str+f'_Screenshot_{self.trial_type}.png'))
             else: 
                 # the button press onset in the global experiment time
                 t = thisKey.rt
