@@ -42,6 +42,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.subject_ID = subject_ID
         self.path_to_stim = self.settings['Task settings']['Stimulus path']
         self.stim_size = self.settings['Task settings']['Stimulus size']
+        self.fixation_dot_size = self.settings['Task settings']['Fixation dot size']
         self.n_blocks = self.settings['Task settings']['Blocks'] 
         self.n_practice_blocks = self.settings['Task settings']['Blocks practice'] 
         self.break_duration = self.settings['Task settings']['Break duration']
@@ -169,7 +170,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
     def create_stimuli(self):
 
         # here we load the images that were produced in the MATLAB code 
-        self.fixation_dot = visual.ImageStim(self.win, image=self.path_to_stim+'FixDot.bmp')
+        self.fixation_dot = visual.ImageStim(self.win, image=self.path_to_stim+'FixDot.bmp',  units='deg', size=self.fixation_dot_size)
 
         # load a stimulus that can test the eye tracking data 
         dots = [visual.Circle(self.win, lineColor='red', units='pix', size=70, pos=[-250,-250]),

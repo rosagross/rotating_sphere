@@ -50,5 +50,6 @@ Please check the ```settings.yml``` file for experiment settings that can be cha
 
 ## ToDos: 
 
+- check dot colour in break vs in the trials, in the paper the dot is green (and has size 0.18)
 - check the stimulus speed!
 - improve naming of the previous frames indices (e.g. ambiguous_last_frame_previous is way too long and unclear)

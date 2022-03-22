@@ -28,9 +28,10 @@ Task settings:
     Previous percept duration: [405, 240, 105, 450, 315, 540, 270, 255, 210, 120, 330, 360] # list with values in frames or int in seconds
     Percept duration jitter: 0.5 # in s, added to the previous percept duration (0.1 would be a random UNIFORM jitter between -0.1 and 0.1)
     Stimulus duration ambiguous: 120 # (2mins) duration in s
-    Break duration: 5 # duration in s (this is between the trials AND blocks)
+    Break duration: 10 # duration in s (this is between the trials AND blocks)
     Stimulus path: './stimuli/'
     Stimulus size: 5 # stimulus size in degrees
+    Fixation dot size: 5 # fixation dot size in degrees (shuould be same size as stimulus because it includes the grey background)
     Screenshot: False # makes a screenshot when aborting experiment if True
     Exit key: 'q'
     Monitor framerate: 120 # or 60Hz, this changes how the rotating spheres are displayed 
