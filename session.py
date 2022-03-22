@@ -218,7 +218,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
 
             if isinstance(self.previous_percept_duration, list):
                 print('Use predefined phase durations')
-                phase_durations = [elem*2 for elem in self.previous_percept_duration]
+                phase_durations = [elem*self.refresh_stimulus_speed for elem in self.previous_percept_duration]
                 np.random.shuffle(phase_durations)
             else:
                 # while the number is not above the trial duration, generate more trial durations

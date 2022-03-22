@@ -23,7 +23,7 @@ def main():
     output_str = subject + '_' + sess
     output_dir = './output_data/'+output_str+'_Logs_rotating_sphere'
     settings_file = './settings.yml'
-    eyetracker_on = False
+    eyetracker_on = True if sys.argv[3] == "True" else False
 
     if not os.path.exists('./output_data'):
         os.mkdir('./output_data')

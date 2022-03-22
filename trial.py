@@ -57,8 +57,7 @@ class RSTrial(Trial):
         keys = self.session.kb.getKeys(waitRelease=True)
         for thisKey in keys:
 
-            if thisKey=='q':  # it is equivalent to the string 'q'
-
+            if thisKey==self.session.exit_key:  # it is equivalent to the string 'q'
                 print("End experiment!")
                 self.session.save_output()
 
