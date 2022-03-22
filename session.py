@@ -54,6 +54,8 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         self.phase_names = ["fixation", "stimulus", "response"]
         self.exit_key = self.settings['Task settings']['Exit key']
         self.monitor_refreshrate = self.settings['Task settings']['Monitor framerate']
+        self.test_eyetracker = self.settings['Task settings']['Test eyetracker']
+
         if self.settings['Task settings']['Screenshot']==True:
             self.screen_dir=output_dir+'/'+output_str+'_Screenshots'
             if not os.path.exists(self.screen_dir):
@@ -92,15 +94,7 @@ class RotatingSphereSession(PylinkEyetrackerSession):
     def create_trials(self):
         """
         Creates the trials with its phase durations and randomization. 
-        One trial looks like the following, depending on the block type:
-
-        Unambiguous:
-        1) 10s break, showing the fixation cross only
-        2) ~ s right or left rotating sphere
-
-        Ambiguous:
-        1) 10s break, showing the fixation cross only
-        2) 120s for the stimulus 
+        One trial looks like the following, depending on the block type
         """
         self.trial_list = []
         self.practice_blocks = []
@@ -129,10 +123,11 @@ class RotatingSphereSession(PylinkEyetrackerSession):
         
         block_ID = 0
         # trial to test the eye tracker and the data analysis (e.g. if positions are measured correctly)
-        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '0', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
-        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '1', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
-        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '2', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
-        self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '3', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+        if self.test_eyetracker:
+            self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '0', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+            self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '1', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+            self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '2', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
+            self.trial_list.append(RSTrial(self, 0, block_ID, 'tracking_test', '3', self.response_hand, [5*self.monitor_refreshrate], 'frames', 0))
 
         # start off with a break
         self.trial_list.append(RSTrial(self, 0, block_ID, 'break', 'break', self.response_hand, [self.break_duration*self.monitor_refreshrate], 'frames', 0))

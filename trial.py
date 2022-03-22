@@ -67,7 +67,7 @@ class RSTrial(Trial):
                 self.session.close()
                 self.session.quit()
 
-            elif thisKey=='s':
+            elif (thisKey=='s') & (self.session.settings['Task settings']['Screenshot']==True):
                 self.session.win.getMovieFrame()
                 self.session.win.saveMovieFrames(opj(self.session.screen_dir, self.session.output_str+f'_Screenshot_{self.trial_type}.png'))
             else: 
