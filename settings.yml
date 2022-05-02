@@ -6,34 +6,50 @@ preferences:
 window:
     size: [1920, 1080]
     pos: [0, 0]
-    color: [0, 0, 0]
+    color: [186, 186, 186]
+    colorSpace: 'rgb255'
     fullscr: True
     winType: pyglet
     waitBlanking: True
 
 monitor:
     name: default
-    width: 69.8  # in cm
-    distance: 198  # in cm
+    width: 60 # 69.8  # in cm
+    distance: 172.06 # 198 # in cm
     gamma: 1
 
 operating system: linux
 
 Task settings: 
-    Response interval: [0.1, 1.5] # time in s you allow the participant to respond that still counts as correct response (only relevant for unambiguous stimuli)
-    Response hand: 'preferred_right' # enter here which hand was used to respond to the stimulus!
-    Buttons: ['n', 'i'] # enter dependent on preferred hand - lower key first
+    Previous percept duration: [405, 240, 105, 450, 315, 540, 270, 255, 210, 120, 330, 360] # list with frame values (still to be converted into screenticks!) or int in seconds
+    Percept duration jitter: 0.5 # NOT USED when list entered in s, added to the previous percept duration (0.1 would be a random UNIFORM jitter between -0.1 and 0.1)
+    Stimulus duration ambiguous: 20 # (2mins) duration in s
     Blocks: 4 # e.g. 2 blocks would be one that starts with ambiguous and one that starts with unambiguous.
     Blocks practice: 2 # can be interrupted after every block - alternating ambiguous and unambiguous, ambiguous is always first 
-    Previous percept duration: [405, 240, 105, 450, 315, 540, 270, 255, 210, 120, 330, 360] # list with values in frames or int in seconds
-    Percept duration jitter: 0.5 # in s, added to the previous percept duration (0.1 would be a random UNIFORM jitter between -0.1 and 0.1)
-    Stimulus duration ambiguous: 120 # (2mins) duration in s
-    Break duration: 10 # duration in s (this is between the trials AND blocks)
-    Stimulus path: './stimuli/'
-    Stimulus size: 5 # stimulus size in degrees
-    Fixation dot size: 5 # fixation dot size in degrees (shuould be same size as stimulus because it includes the grey background)
-    Screenshot: False # makes a screenshot when aborting experiment if True
+    Response interval: [0.1, 1.5] # time in s you allow the participant to respond that still counts as correct response (only relevant for unambiguous stimuli)
+    Break duration: 1000 # duration in s (this is between blocks)
+    Get ready duration: 1 # in sec, before the stimulus actually appears 
+    Stimulus size: 5 # stimulus size in degrees    
+    Fixation dot size: 5 # fixation dot size in degrees (should be same size as stimulus because it includes the grey background)
     Exit key: 'q'
-    Monitor framerate: 120 # or 60Hz, this changes how the rotating spheres are displayed 
+    Break buttons : ['b'] # what button to press to continue the experiment after a break
+    Monitor refreshrate: 60 # or 60Hz, this changes how the rotating spheres are displayed
+    Screentick conversion: 30 # The value used to calculate how many screenticks there are per frame (check Readme for how we use the term 'frame')
     Test eyetracker: False
-    
+    Screenshot: False # makes a screenshot when aborting experiment if True
+
+Stimulus settings:
+    Stimulus path: './stimuli/stimuli_186RGB/'
+    Stimulus resolution: 800 # this will be used to load the correct stimulus! Pay attention to the filename format!
+    Dot size: 0.02 # same as stimulus resolution!
+    Number frames: 190 # How many images of the globe do we have to complete one full rotation
+    Number dots: 350 # how many dots are in the sphere (should be set in your filename)
+    Sphere number ambiguous: 1 # create multiple spheres with the same parameters without overwriting the existing bmps
+    Sphere number unambiguous: 5
+    Black at back: 0.25 # the following paramter define color of dots and background 
+    White at back: 0.75
+    Black at front: 0
+    White at front: 1
+    Dot size min: 0.012 # size of the dots 
+    Dot size max: 0.028
+
